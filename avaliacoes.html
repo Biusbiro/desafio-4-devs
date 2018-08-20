@@ -1,0 +1,268 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+
+    <title>desafio-4-devs</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+  </head>
+
+  <body onload="loadPage()" class="bg-light">
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExample03">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="index.html">Home 
+              
+            <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="clientes.html">Clientes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Avaliações</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="classificacao.html">Classificação</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+
+
+      <div class="py-5 text-center">
+        <img class="d-block mx-auto mb-4" src="https://i0.wp.com/www.forlogic.net/wp-content/uploads/2017/07/LogoGrupo_Oficial-cinza.png?resize=210px%2C" alt="" width="300">
+        <h2></h2>
+        <p class="lead">Painel de Clientes, aqui é realizado o cadastro de novos clientes, edição de dados e deleção dos clientes</p>
+      </div>
+
+
+
+      
+      <div class="row">
+        <div class="col-md-4 order-md-2 mb-4">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">Avaliações cadastradas</span>
+            <span class="badge badge-secondar y badge-pill" id="sizeEvaluation">...</span>
+          </h4>
+          <ul class="list-group mb-3" id="evaluationList">
+          </ul>
+        </div>
+
+        <div class="col-md-8 order-md-1">
+          <h4 class="mb-3">Nova Avaliação</h4>
+          <form class="needs-validation" novalidate="">
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label for="inputEvaluationDate">Nome ou Razão Social</label>
+                <input type="date" class="form-control" id="inputEvaluationDate" placeholder="" value="" required="">
+                <div class="invalid-feedback">
+                  Por favor, insira uma data válida
+                </div>
+              </div>
+            </div>
+            
+            <hr class="mb-4">
+            <h4 class="mb-3">Clientes que participarão </h4>
+            <div class="alert alert-dark" role="alert"> Clientes cadastrados no sistema: <spam id="sizeCostumers">...<spam/>
+            </div>
+            <div class="alert alert-dark" role="alert"> Clientes permitidos nesta avaliação: <spam id="avaliableCostumers">...<spam/>
+            </div>
+            <div class="alert alert-dark" role="alert"> Maximo de Clientes nesta avaliação: <spam id="maxCostumers">...<spam/>
+            </div>
+            <div id="costumerList">
+            </div>
+            <hr class="mb-4">
+            <div class="btn btn-primary btn-lg btn-block" onclick="registerEvaluations()" type="submit">Cadastrar nova Avaliação</div>
+          </form>
+        </div>
+      </div>
+
+
+      <footer class="my-5 pt-5 text-muted text-center text-small">
+        <p class="mb-1">2018 Teste da Forlogic</p>
+      </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>
+      window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')
+    </script>
+    <script>
+      (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+          var forms = document.getElementsByClassName('needs-validation');
+          var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        }, false);
+      })();
+    </script>
+    <script language="JavaScript">
+
+      var Evaluation =(function () {
+        function Evaluation() {
+        }
+        return Evaluation;
+      }());
+
+      var checkedCostumers = [];
+
+      function loadPage(){
+          var costumers = loadCostumerList();
+          var evaluations = loadEvaluations();
+          loadEvaluationList(evaluations);
+          loadAvaliableCustomers(costumers, evaluations);
+      }
+
+      function registerEvaluations(){
+        var inputEvaluationDate = document.getElementById("inputEvaluationDate");
+        var evaluations = [];
+
+        for(var id in checkedCostumers){
+          var evaluation = new Evaluation();
+          evaluation.idCostumer = checkedCostumers[id];
+          evaluation.rate = "0";
+          evaluation.reason = "";
+          evaluation.date = formatInvertedDate(inputEvaluationDate.value);
+
+          var newEvaluation = JSON.stringify(evaluation);
+          evaluations.push(newEvaluation);
+        }
+
+        for(var id in evaluations){
+          console.log(evaluations[id]);
+          registerEvaluation(evaluations[id]);
+        }
+      }
+
+      
+
+      //lista os meses das avaliações realizadas
+      function loadEvaluationList(evaluations){
+        var list = document.getElementById("evaluationList");
+        var size = document.getElementById("sizeEvaluation");
+        size.textContent = Object.keys(evaluations).length;
+        var listUniqueDate = [];
+        for (var id in evaluations) {
+          if (listUniqueDate.length === 0){
+            listUniqueDate.push(evaluations[id].date);
+          }else if (evaluations[id].date !== listUniqueDate[listUniqueDate.length - 1]){
+            listUniqueDate.push(evaluations[id].date);
+          }
+        }
+        mountEvaluationList(listUniqueDate, list);
+      }
+
+      //Lista os clientes que participarão
+      function loadAvaliableCustomers(costumers, evaluations){
+        var sizeCostumersSlot = document.getElementById("sizeCostumers");//pega elemento spam
+        var sizeCostumers = Object.keys(costumers).length;
+        sizeCostumersSlot.textContent = sizeCostumers;
+
+        var percent = parseFloat(20) ;
+        var maxCostumers = parseInt(sizeCostumers*(percent/100));
+        var maxCostumersSlot = document.getElementById("maxCostumers");//pega elemento spam
+        maxCostumersSlot.textContent = maxCostumers;
+
+        var recentMonths = getRecentMonths();
+        var bannedUnfilter = getIdBannedCustomers(recentMonths, evaluations);
+        var banned = bannedUnfilter.filter(function(filtro, i) {
+          return bannedUnfilter.indexOf(filtro) == i;
+        })
+
+        var avaliableIdList = getUniqueIdCostumers(costumers);
+
+        avaliableIdList = avaliableIdList.filter(function (objeto) { 
+          return banned.indexOf(objeto) == -1 
+        });
+
+        var avaliableCostumersSlot = document.getElementById("avaliableCostumers");//pega elemento spam
+        var avaliableCostumers = Object.keys(avaliableIdList).length;
+        avaliableCostumersSlot.textContent = avaliableCostumers;
+
+        for(var id in avaliableIdList){
+          var list = document.getElementById("costumerList");
+          var div = document.createElement("div");
+          var input = document.createElement("input");
+          var label = document.createElement("label");
+
+          div.classList.add("custom-control");
+          div.classList.add("custom-checkbox");
+
+          input.classList.add("custom-control-input");
+          input.setAttribute("type", "checkbox");
+          input.setAttribute("name", "inputSelectedCostumers");
+          input.setAttribute("id", avaliableIdList[id]);
+          input.setAttribute("value", avaliableIdList[id]);
+
+          label.classList.add("custom-control-label");
+          label.setAttribute("for", avaliableIdList[id]);
+          list.appendChild(div);
+          div.appendChild(input);
+          div.appendChild(label);
+          label.textContent = loadCostumerById(avaliableIdList[id]).name;
+        }
+
+      function getSelectedCostumers() {
+        var costumers = document.querySelectorAll('[name=inputSelectedCostumers]:checked');
+        var values = [];
+        for (var i = 0; i < costumers.length; i++) {
+          values.push(costumers[i].value);
+        }
+        if(costumers.length + 1 > maxCostumers){
+          console.log("desabilita na prox");
+          var disableds = document.querySelectorAll('[name=inputSelectedCostumers]');
+          for (var i = 0; i < disableds.length; i++) {
+            disableds[i].disabled = true;
+          }
+        }
+        checkedCostumers = values;
+      }
+
+      var checkboxes = document.querySelectorAll('[name=inputSelectedCostumers]');
+      for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].addEventListener('click', getSelectedCostumers, false);
+      }
+    }
+
+      function getUniqueIdCostumers(responseJsonCustomers){
+        var avaliable = [];
+        for (var id in responseJsonCustomers){
+          avaliable.push(id);
+        }
+        return avaliable;
+      }
+    </script>
+
+    <script src="DAO/daoEvaluation.js"></script>
+    <script src="tools/componentsEvaluation.js"></script>
+    <script src="tools/constants.js"></script>
+    <script src="DAO/daoCostumer.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+  
+    
+</body>
+</html>

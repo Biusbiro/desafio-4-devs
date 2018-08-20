@@ -1,0 +1,275 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+
+    <title>desafio-4-devs</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+  </head>
+
+  <body onload="loadPage()" class="bg-light">
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExample03">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="index.html">Home 
+              
+            <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="clientes.html">Clientes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="avaliacoes.html">Avaliações</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Classificação</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+
+
+      <div class="py-5 text-center">
+        <img class="d-block mx-auto mb-4" src="https://i0.wp.com/www.forlogic.net/wp-content/uploads/2017/07/LogoGrupo_Oficial-cinza.png?resize=210px%2C" alt="" width="300">
+        <h2></h2>
+        <p class="lead">
+          Nesta página é possivel verificar a Classificação de cada Mês e simular as avaliações no painel inferior
+        </p>
+      </div>
+      
+
+      <h4 class="mb-3">Classificação Mensal</h4>
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Mês</th>
+              <th>Meta</th>
+            </tr>
+          </thead>
+          <tbody id="resultMonths">
+            
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="mb-3">Simulador das avaliações</h4>
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Data</th>
+              <th style="width: 30%">Nota</th>
+              <th>Motivo</th>
+              <th>SAVE</th>
+              <th>DEL</th>
+            </tr>
+          </thead>
+          <tbody id="table">
+          </tbody>
+        </table>
+      </div>
+  
+    </div>
+
+
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script>
+      (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+          var forms = document.getElementsByClassName('needs-validation');
+          var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        }, false);
+      })();
+    </script>
+
+    <script>
+
+      function loadPage(){
+        var evaluations = loadEvaluations();
+        mountSimulatorList(evaluations);
+        var monthList = getMonthList(evaluations);
+        mountMonthResult(monthList, evaluations);
+      }
+
+      function getMonthList(evaluations){
+        var listUniqueDate = [];
+        for (var id in evaluations) {
+          if (listUniqueDate.length === 0){
+            listUniqueDate.push(evaluations[id].date);
+          }else if (evaluations[id].date !== listUniqueDate[listUniqueDate.length - 1]){
+            listUniqueDate.push(evaluations[id].date);
+          }
+        }
+        return listUniqueDate;
+      }
+
+      function getEvaluationsPerMonth(){
+        var evaluations = loadEvaluations();
+      }
+
+      function mountMonthResult(monthList, evaluations){
+        for (var id in monthList){
+          var evaluationsMonth = [];
+          for(var key in evaluations){
+            if (monthList[id] === evaluations[key].date){
+              evaluationsMonth.push(evaluations[key]);
+            }
+          }
+          injectHtmlMonth(evaluationsMonth);
+        }
+      }
+
+      function injectHtmlMonth(evaluations){
+        var month = evaluations[0].date;
+        var promotor = 0;
+        var neutro = 0
+        var detrator = 0;
+        var participantes = evaluations.length;
+        var resultado = 0;
+
+        for (var id in evaluations){
+          if(evaluations[id].rate >= 8){
+            promotor++;
+          }else if(evaluations[id].rate >= 6 && evaluations[id].rate < 8){
+            neutro++;
+          }else{
+            detrator++;
+          }
+        }
+        resultado = ((promotor - detrator)/participantes)*100;
+        var list = document.getElementById("resultMonths")
+        var tr = document.createElement("tr");
+        var tdMonth = document.createElement("td");
+        var tdResult = document.createElement("td");
+        resultMonths.appendChild(tr);
+        tr.appendChild(tdMonth);
+        tr.appendChild(tdResult);
+        tdMonth.textContent = month;
+        tdResult.textContent = getMetaResult(resultado);
+        tdResult.style.backgroundColor = getMetaColor(resultado);
+      }
+
+      function getMetaColor(value){
+        if(value >= 80){
+          return "#93d88e";
+        }else if(value >= 60){
+          return "#fbffbd";
+        }else{
+          return "#efb4b4";
+        }
+      }
+
+      function getMetaResult(value){
+        if(value >= 80){
+          return "Meta Atingida";
+        }else if(value >= 60){
+          return "Meta dentro da tolerância";
+        }else{
+          return "Meta não atingida";
+        }
+      }
+
+      function mountSimulatorList(evaluations){
+        for (var id in evaluations){
+          var table = document.getElementById("table");
+
+          var tr = document.createElement("tr");
+
+          table.appendChild(tr);
+
+          var tdName = document.createElement("td");
+          var tdDate = document.createElement("td");
+          var tdRate = document.createElement("td");
+          var tdReason = document.createElement("td");
+          var tbBtnSave = document.createElement("td");
+          var tbBtnDel = document.createElement("td");
+
+          var divName = document.createElement("div");
+          var divDate = document.createElement("div");
+          var divRate = document.createElement("div");
+          var divReason = document.createElement("div");
+          var divBtnSave = document.createElement("div");
+          var divBtnDel = document.createElement("div");
+
+          tr.appendChild(tdName);
+          tr.appendChild(tdDate);
+          tr.appendChild(tdRate);
+          tr.appendChild(tdReason);
+          tr.appendChild(tbBtnSave);
+          tr.appendChild(tbBtnDel);
+
+          tdName.appendChild(divName);
+          tdDate.appendChild(divDate);
+          tdRate.appendChild(divRate);
+          tdReason.appendChild(divReason);
+          tbBtnSave.appendChild(divBtnSave);
+          tbBtnDel.appendChild(divBtnDel);
+
+          var inputRate = document.createElement("input");
+          var inputReason = document.createElement("input");
+
+          inputRate.setAttribute("id", "rate" + id);
+          inputReason.setAttribute("id", "reason" + id);
+
+          divRate.appendChild(inputRate);
+          divReason.appendChild(inputReason);
+
+          divName.textContent = id;
+          divDate.textContent = evaluations[id].date;
+          inputRate.value = evaluations[id].rate;
+          inputReason.value = evaluations[id].reason;
+          divBtnSave.textContent = "save";
+          divBtnDel.textContent = "delete";
+
+
+          divBtnSave.classList.add("material-icons");
+          divBtnDel.classList.add("material-icons");
+
+          divBtnSave.setAttribute("onclick","editEvaluation('" + id + "');");
+          divBtnDel.setAttribute("onclick","deleteEvaluation('" + id + "');");
+        }
+      }
+
+    </script>
+    <script src="DAO/daoEvaluation.js"></script>
+    <script src="DAO/daoCostumer.js"></script>
+    <script src="tools/constants.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+  
+
+</body></html>
